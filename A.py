@@ -23,11 +23,6 @@ location_options = ['Any'] + data['location_with_pincode'].unique().tolist()
 location_with_pincode = st.sidebar.selectbox("Select Location with Pincode", location_options)
 
 if location_with_pincode != 'Any':
-    # Fetch latitude and longitude from the dataset based on the selected location_with_pincode
-    selected_property = data[data['location_with_pincode'] == location_with_pincode].iloc[0]
-    latitude = selected_property['Latitude']
-    longitude = selected_property['Longitude']
-
     # Define a function to calculate minimum sqft and price based on the selected location_with_pincode
     def calculate_min_values(location_with_pincode):
         # Initialize minimum values to high values
@@ -56,31 +51,15 @@ if location_with_pincode != 'Any':
     price = st.sidebar.number_input("Enter Price (INR)", min_value=min_price, value=min_price, max_value=1000000000)
 
 if st.sidebar.button("Recommend"):
-    # Create a custom TF-IDF vectorizer that assigns weights to latitude and longitude
-    def custom_tfidf_vectorizer(data):
-        tfidf_vectorizer = TfidfVectorizer()
-        tfidf_matrix = tfidf_vectorizer.fit_transform(data)
-        
-        # Add weight to latitude and longitude
-        latitude_weight = 2.0
-        longitude_weight = 2.0
-        
-        # Find the indices of latitude and longitude in the vocabulary
-        latitude_index = tfidf_vectorizer.vocabulary_['Latitude']
-        longitude_index = tfidf_vectorizer.vocabulary_['Longitude']
-        
-        # Apply weights to latitude and longitude
-        tfidf_matrix[:, latitude_index] *= latitude_weight
-        tfidf_matrix[:, longitude_index] *= longitude_weight
-        
-        return tfidf_matrix
+    # Create a TF-IDF vectorizer
+    tfidf_vectorizer = TfidfVectorizer()
 
     # Combine features for TF-IDF
-    data['combined_features'] = data[['bedrooms', 'transaction_type', 'property_type', 'price', 'location_with_pincode', 'carpet_area_sqft', 'Latitude', 'Longitude']].apply(lambda row: ' '.join(map(str, row)), axis=1)
-    tfidf_matrix = custom_tfidf_vectorizer(data['combined_features'])
+    data['combined_features'] = data[['bedrooms', 'transaction_type', 'property_type', 'price', 'location_with_pincode', 'carpet_area_sqft']].apply(lambda row: ' '.join(map(str, row)), axis=1)
+    tfidf_matrix = tfidf_vectorizer.fit_transform(data['combined_features'])
 
-    user_input_str = ' '.join(map(str, [bedrooms, transaction_type, property_type, price, location_with_pincode, sqft, latitude, longitude]))
-    user_tfidf = custom_tfidf_vectorizer([user_input_str])
+    user_input_str = ' '.join(map(str, [bedrooms, transaction_type, property_type, price, location_with_pincode, sqft]))
+    user_tfidf = tfidf_vectorizer.transform([user_input_str])
 
     cosine_similarities = linear_kernel(user_tfidf, tfidf_matrix).flatten()
 
@@ -90,8 +69,6 @@ if st.sidebar.button("Recommend"):
 
     st.subheader("Top 10 Recommended Properties:")
     
-    recommendations_found = False  # Initialize a flag to check if any recommendations are found
-
     for i in range(N):
         index = sorted_indices[i]
         property_info = data.iloc[index]
@@ -108,8 +85,6 @@ if st.sidebar.button("Recommend"):
             st.markdown(f"**Bedrooms:** {property_info['bedrooms']}")
             st.markdown(f"**Carpet Area (in sqft):** {property_info['carpet_area_sqft']}")
             st.markdown(f"**Property Type:** {property_info['property_type']}")
-            st.markdown(f"**Latitude:** {property_info['Latitude']}")
-            st.markdown(f"**Longitude:** {property_info['Longitude']}")
         
         with col2:
             st.markdown(f"**Transaction Type:** {property_info['transaction_type']}")
@@ -121,12 +96,5 @@ if st.sidebar.button("Recommend"):
         property_link = property_info['links']
         st.markdown(f"[Click here]({property_link})")
 
-        # Set the flag to indicate recommendations are found
-        recommendations_found = True
-
         # Add a delimiter line
         st.markdown("---")
-    
-    # Check if no recommendations were found and display a message
-    if not recommendations_found:
-        st.info("Here are some of the similar results.")
