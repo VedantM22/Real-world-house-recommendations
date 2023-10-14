@@ -17,46 +17,42 @@ st.title("Property Recommendations")
 st.sidebar.title("User Input")
 
 # Create input fields for user preferences
-bedrooms, transaction_type, property_type, price, location_with_pincode, sqft = None, None, None, None, None, None  # Set initial values to None
+bedrooms, transaction_type, property_type, price, location_with_pincode, sqft = None, None, None, None, None, None
 
 location_options = data['location_with_pincode'].unique().tolist()
-
 location_with_pincode = st.sidebar.selectbox("Select Location with Pincode", [''] + location_options)
 
-# If location_with_pincode is selected, show all input sections
 if location_with_pincode:
     st.sidebar.markdown("**User Preferences:**")
-    
-    # Set available bedroom options based on the selected location
+
     available_bedroom_options = data[data['location_with_pincode'] == location_with_pincode]['bedrooms'].unique()
-    bedrooms_options = [1] + available_bedroom_options.tolist()  # Change the default value to 1
-    bedrooms = st.sidebar.selectbox("Select Number of Bedrooms", bedrooms_options)  # Set the initial value to 1
+    bedrooms_options = ['Any'] + available_bedroom_options.tolist()
+    bedrooms = st.sidebar.selectbox("Select Number of Bedrooms", bedrooms_options)
 
-    # Define a function to calculate minimum sqft and price based on the selected location_with_pincode and bedrooms
     def calculate_min_values(location_with_pincode, bedrooms):
-        # Initialize minimum values to high values
-        min_sqft = 999999
-        min_price = 999999999
+        min_sqft = None  # Set initial value to None
+        min_price = None  # Set initial value to None
 
-        # Iterate through the data to find the actual minimum values
         for _, row in data.iterrows():
-            if row['location_with_pincode'] == location_with_pincode and row['bedrooms'] == bedrooms:
-                min_sqft = min(min_sqft, row['carpet_area_sqft'])
-                min_price = min(min_price, row['price'])
+            if row['location_with_pincode'] == location_with_pincode and (bedrooms == 'Any' or row['bedrooms'] == bedrooms):
+                if min_sqft is None or row['carpet_area_sqft'] < min_sqft:
+                    min_sqft = row['carpet_area_sqft']
+                if min_price is None or row['price'] < min_price:
+                    min_price = row['price']
 
         return min_sqft, min_price
 
     if bedrooms is not None:
-        # Get the minimum values based on the selected location_with_pincode and bedrooms
         min_sqft, min_price = calculate_min_values(location_with_pincode, bedrooms)
 
-        # Display other input sections with minimum values as limits
         transaction_type_options = ['Any', 'New Property', 'Resale']
         transaction_type = st.sidebar.selectbox("Select Transaction Type", transaction_type_options)
         property_type_options = ['Any', 'Apartment', 'Villa', 'Penthouse']
         property_type = st.sidebar.selectbox("Select Property Type", property_type_options)
-        sqft = st.sidebar.number_input("Enter the Carpet Area (sqft)", min_value=min_sqft, value=min_sqft, max_value=10000)
-        price = st.sidebar.number_input("Enter Price (INR)", min_value=min_price, value=min_price, max_value=1000000000)
+        sqft_options = ['Any'] + list(range(int(min_sqft), 10001))
+        sqft = st.sidebar.selectbox("Select Carpet Area (sqft)", sqft_options)
+        price_options = ['Any'] + list(range(int(min_price), 1000000001, 500000))
+        price = st.sidebar.selectbox("Select Price (INR)", price_options)
 
     if st.sidebar.button("Recommend"):
         # Create a TF-IDF vectorizer
