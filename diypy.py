@@ -6,7 +6,7 @@ import pandas as pd
 from scipy.spatial.distance import cosine
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
-import regex as re
+#import regex as re
 
 # Sample user input (replace with your own)
 df = pd.read_csv('clean.csv')
