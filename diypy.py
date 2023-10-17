@@ -78,7 +78,7 @@ if st.sidebar.button("Recommend"):
             with col2:
                 st.markdown(f"**Price:** ₹{formatted_price} crores ({int(row['price'])} INR)")
                 st.markdown(f"**Furniture:** {row['furniture']}")
-                st.markdown(f"**Parking:** {row['parking']}")
+                st.markdown(f"**Sqft:** {row['sqft']}")
                 property_link = row['links']
                 st.markdown(f"[Click here]({property_link})")
                 st.markdown("---")
@@ -95,7 +95,7 @@ if st.sidebar.button("Recommend"):
                 st.markdown("---")
             with col2:
                 st.markdown(f"**Price:** ₹{formatted_price} crores ({int(row['price'])} INR)")
-                st.markdown(f"**Furniture:** {row['furniture']}")
+                st.markdown(f"**Sqft:** {row['sqft']}")
                 st.markdown(f"**Parking:** {row['parking']}")
                 property_link = row['links']
                 st.markdown(f"[Click here]({property_link})")
