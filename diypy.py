@@ -63,7 +63,7 @@ if st.sidebar.button("Recommend"):
 
     if len(filter_data) < 10:
         error = 10 - int(len(filter_data))
-        st.header(f"There are {len(filter_data)} such apartments available, here are some recommendations")
+        st.header(f"There are {len(filter_data)} such apartments available, So here are the those apartments and some other recommendations")
         sorted_data_new = sorted_data.head(error) 
         rec_data = pd.concat([filter_data, sorted_data_new], axis=0)
         col1, col2 = st.columns(2)
