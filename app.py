@@ -5,7 +5,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 
 # Load your dataset
-df = pd.read_csv('FINAL_CAP.csv')
+df = pd.read_csv('FINAL_cap.csv')
 
 # Set page layout and style
 st.set_page_config(
