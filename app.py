@@ -67,7 +67,7 @@ def recommend_properties(df, pincode, price, bedroom, furniture, rank):
     similar_indices = cosine_similarities[0].argsort()[:-n_recommendations-1:-1]
 
     recommended_properties = df.iloc[similar_indices][['prc', 'bed', 'web', 'pincode','amenities','carpet area', 'location_pincode','location', 'facing', 'furnished status', 'link', 'status', 'price']]
-    recommended_properties = recommended_properties.sort_values(by='prc')
+    #recommended_properties = recommended_properties.sort_values(by='prc')
 
     return recommended_properties
 
